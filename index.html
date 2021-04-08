@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⏲计时</title>
+  <style>
+    @font-face {
+      font-family: clockicons;
+      src: url('./clockicons.woff2')
+    }
+
+    html,
+    body {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: clockicons;
+      font-size: 150%;
+    }
+
+    #time {
+      position: relative;
+      z-index: 1;
+    }
+
+    #time,
+    #start {
+      width: 80%;
+      text-align: right;
+    }
+
+    #start {
+      font-size: 80%;
+      margin-top: 5vh;
+    }
+
+    .bigtime {
+      font-size: 150%;
+    }
+
+    .smalltime {
+      font-size: 100%;
+    }
+
+    .static {
+      color: #666;
+    }
+
+    .running {
+      color: #000;
+    }
+
+    .img {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 50%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='time' class="static">
+    <span class='bigtime'>00:00:00</span>
+    <span class='smalltime'>00</span>
+  </div>
+  <div id='start'>--:--</div>
+  <img class="img" src='./cat-stop.png' />
+  <script>
+    let running = false;
+    // DOM
+    const time = document.getElementById('time');
+    const bigTime = document.getElementsByClassName('bigtime')[0];
+    const smallTime = document.getElementsByClassName('smalltime')[0];
+    const img = document.getElementsByClassName('img')[0];
+    const start = document.getElementById('start');
+    // 变量
+    let timer = null;
+    let count = 0, lastCount = 0;
+    let startStamp = new Date().getTime();
+    function startCount() {
+      running = true;
+      time.className = 'running';
+      startStamp = new Date().getTime();
+    }
+    function calcCount() {
+      let curStamp = new Date().getTime();
+      count = lastCount + curStamp - startStamp;
+      updateUI();
+    }
+    function pauseCount() {
+      lastCount = count;
+      running = false;
+      time.className = 'static';
+      clearInterval(timer);
+    }
+    function stopCount() {
+      count = 0;
+      pauseCount();
+      updateUI();
+      resetStartTime();
+    }
+    function updateUI() {
+      const { hour, min, sec, ms } = getTime(count);
+      bigTime.innerHTML = `${hour}:${min}:${sec}`;
+      smallTime.innerHTML = ms;
+    }
+    function recordStartTime() {
+      start.innerHTML = `${new Date().getHours()}:${new Date().getMinutes()}`;
+    }
+    function resetStartTime() {
+      start.innerHTML = `--:--`;
+    }
+    document.onclick = () => {
+      if (!running) {
+        if (!count) {
+          recordStartTime();
+        }
+        startCount();
+        timer = setInterval(() => {
+          calcCount();
+        }, 10)
+      }
+      else {
+        pauseCount();
+      }
+    }
+    img.onclick = (e) => {
+      e.stopPropagation();
+      stopCount();
+    }
+
+    function getTime(count) {
+      count = parseInt(count / 10);
+      const fillZero = (num) => num < 10 ? `0${num}` : num;
+      const hour = fillZero(parseInt(count / 100 / 60 / 60));
+      const min = fillZero(parseInt(count / 100 / 60) % 60);
+      const sec = fillZero(parseInt(count / 100) % 60);
+      const ms = fillZero(count % 100);
+      return { hour, min, sec, ms };
+    }
+  </script>
+</body>
+
+</html>
