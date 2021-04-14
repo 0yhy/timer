@@ -87,14 +87,17 @@
     // 变量
     let timer = null;
     let count = 0, lastCount = 0;
-    let startStamp = new Date().getTime();
+    let startStamp = Date.now();
     function startCount() {
       running = true;
       time.className = 'running';
-      startStamp = new Date().getTime();
+      startStamp = Date.now();
+      timer = setInterval(() => {
+        calcCount();
+      }, 10)
     }
     function calcCount() {
-      let curStamp = new Date().getTime();
+      let curStamp = Date.now();
       count = lastCount + curStamp - startStamp;
       updateUI();
     }
@@ -127,9 +130,6 @@
           recordStartTime();
         }
         startCount();
-        timer = setInterval(() => {
-          calcCount();
-        }, 10)
       }
       else {
         pauseCount();
